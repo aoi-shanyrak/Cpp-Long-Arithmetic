@@ -48,5 +48,3 @@ SuperLong::SuperLong(const std::string& str) {
     strc = new_str;
   }
 }
-
-

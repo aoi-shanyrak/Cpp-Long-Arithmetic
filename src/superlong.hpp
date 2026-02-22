@@ -2,39 +2,37 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using n256 = uint8_t;
 using n256plus = uint32_t;
 
-
 enum class Sign { Positive, Negative };
-
 
 class SuperLong {
  public:
-  SuperLong() : sign(Sign::Positive), digits(0) {}
+  SuperLong();
   SuperLong(int64_t num);
   SuperLong(const std::string& str);
-  SuperLong(const SuperLong& other) : sign(other.sign), digits(other.digits) {}
-  SuperLong(SuperLong&& other) noexcept : sign(other.sign), digits(std::move(other.digits)) {}
+  SuperLong(const SuperLong& other);
+  SuperLong(SuperLong&& other) noexcept;
   ~SuperLong() = default;
 
   SuperLong& operator=(const SuperLong& other);
   SuperLong& operator=(SuperLong&& other) noexcept;
 
-  SuperLong operator+(const SuperLong& other) const { return add(*this, other); }
-  SuperLong operator-(const SuperLong& other) const { return subtract(*this, other); }
-  SuperLong operator*(const SuperLong& other) const { return multiply(*this, other); }
-  SuperLong operator/(const SuperLong& other) const { return divide_quo_rem(*this, other).first; }
-  SuperLong operator%(const SuperLong& other) const { return divide_quo_rem(*this, other).second; }
+  SuperLong operator+(const SuperLong& other) const;
+  SuperLong operator-(const SuperLong& other) const;
+  SuperLong operator*(const SuperLong& other) const;
+  SuperLong operator/(const SuperLong& other) const;
+  SuperLong operator%(const SuperLong& other) const;
 
-  SuperLong operator+(int64_t other) const { return add(*this, SuperLong(other)); }
-  SuperLong operator-(int64_t other) const { return subtract(*this, SuperLong(other)); }
-  SuperLong operator*(int64_t other) const { return multiply(*this, SuperLong(other)); }
-  SuperLong operator/(int64_t other) const { return divide_quo_rem(*this, SuperLong(other)).first; }
-  SuperLong operator%(int64_t other) const { return divide_quo_rem(*this, SuperLong(other)).second; }
+  SuperLong operator+(int64_t other) const;
+  SuperLong operator-(int64_t other) const;
+  SuperLong operator*(int64_t other) const;
+  SuperLong operator/(int64_t other) const;
+  SuperLong operator%(int64_t other) const;
 
   bool operator==(const SuperLong& other) const;
   bool operator!=(const SuperLong& other) const;
@@ -43,23 +41,19 @@ class SuperLong {
   bool operator>(const SuperLong& other) const;
   bool operator>=(const SuperLong& other) const;
 
-  void negate() { sign = (sign == Sign::Positive) ? Sign::Negative : Sign::Positive; }
+  void negate();
 
-  bool isZero() const { return digits.size() == 1 && digits[0] == 0; }
-  bool isNegative() const { return sign == Sign::Negative; }
-  bool isPositive() const { return sign == Sign::Positive; }
+  bool isZero() const;
+  bool isNegative() const;
+  bool isPositive() const;
 
   std::string toString() const;
 
  private:
-  std::vector<n256> digits;
   Sign sign;
-
-  SuperLong(n256 num) : sign(Sign::Positive), digits(1, num) {}
-  SuperLong(uint64_t num);
+  std::vector<n256> digits;
 
   void removeLeadingZeros();
-
   void initFromUint64(uint64_t num);
 
   static int abscmp(const SuperLong& a, const SuperLong& b);

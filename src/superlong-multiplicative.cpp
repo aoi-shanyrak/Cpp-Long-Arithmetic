@@ -35,10 +35,14 @@ SuperLong SuperLong::divid256n(size_t shift) const {
 
 SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
+  result.digits.clear(); 
+
   result.digits.reserve(a.digits.size() + b.digits.size());
 
   for (size_t i = 0; i < a.digits.size(); i++) {
     SuperLong temp;
+    temp.digits.clear(); 
+
     for (size_t k = 0; k < i; k++) {
       temp.digits.push_back(0);
     }
@@ -113,17 +117,20 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
   }
 
   SuperLong quotient, remainder;
+  quotient.digits.clear();  
 
   for (size_t i = dividend.digits.size(); i-- > 0;) {
     remainder = remainder.multi256n(1) + SuperLong(dividend.digits[i]);
 
     if (abscmp(remainder, divisor) >= 0) {
-      n256 best = 0, low = 1, high = 255;
+      int best = 0;
+      int low = 1;
+      int high = 255;
 
       while (low <= high) {
-        n256 mid = low + (high - low) / 2;
+        int mid = low + (high - low) / 2;
 
-        SuperLong product = divisor * mid;
+        SuperLong product = divisor * static_cast<int64_t>(mid);
 
         if (abscmp(product, remainder) <= 0) {
           best = mid;
@@ -132,8 +139,8 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
           high = mid - 1;
         }
       }
-      quotient.digits.push_back(best);
-      remainder = remainder - divisor * SuperLong(best);
+      quotient.digits.push_back(static_cast<n256>(best));
+      remainder = remainder - divisor * static_cast<int64_t>(best);
     } else {
       quotient.digits.push_back(0);
     }
@@ -147,3 +154,29 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
   quotient.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
   return {quotient, remainder};
 }
+
+
+SuperLong SuperLong::operator*(const SuperLong& other) const {
+  return multiply(*this, other);
+}
+
+SuperLong SuperLong::operator/(const SuperLong& other) const {
+  return divide_quo_rem(*this, other).first;
+}
+
+SuperLong SuperLong::operator%(const SuperLong& other) const {
+  return divide_quo_rem(*this, other).second;
+}
+
+SuperLong SuperLong::operator*(int64_t other) const {
+  return *this * SuperLong(other);
+}
+
+SuperLong SuperLong::operator/(int64_t other) const {
+  return *this / SuperLong(other);
+}
+
+SuperLong SuperLong::operator%(int64_t other) const {
+  return *this % SuperLong(other);
+}
+

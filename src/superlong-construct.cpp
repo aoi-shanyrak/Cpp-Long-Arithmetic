@@ -8,80 +8,11 @@
 #include <vector>
 
 
-SuperLong::SuperLong(const std::string& str) {
-  if (str.empty()) {
-    throw std::invalid_argument("Input string cannot be empty");
-  }
+SuperLong::SuperLong() : sign(Sign::Positive), digits(1, 0) {}
 
-  size_t start = 0;
-  if (str[0] == '-') {
-    sign = Sign::Negative;
-    start = 1;
-  } else {
-    sign = Sign::Positive;
-    if (str[0] == '+') {
-      start = 1;
-    }
-  }
-  std::string strc = str.substr(start);
+SuperLong::SuperLong(const SuperLong& other) : sign(other.sign), digits(other.digits) {}
 
-  if (strc == "0") {
-    digits.push_back(0);
-    sign = Sign::Positive;
-    return;
-  }
-
-  while (!strc.empty()) {
-    n256 carry = 0;
-    std::string new_str;
-
-    for (char c : strc) {
-      n256plus cur = (c - '0') + carry * 10;
-      n256 digit_quo = static_cast<n256>(cur / 256);
-      carry = static_cast<n256>(cur % 256);
-
-      if (!new_str.empty() or digit_quo != 0) {
-        new_str += (digit_quo + '0');
-      }
-    }
-    digits.push_back(carry);
-    strc = new_str;
-  }
-}
-
-
-void SuperLong::initFromUint64(uint64_t num) {
-  if (num == 0) {
-    digits.push_back(0);
-    return;
-  }
-  while (num > 0) {
-    digits.push_back(static_cast<n256>(num % 256));
-    num /= 256;
-  }
-}
-
-
-SuperLong::SuperLong(uint64_t num) : sign(Sign::Positive) {
-  initFromUint64(num);
-}
-
-
-SuperLong::SuperLong(int64_t num) {
-  if (num == INT64_MIN) {
-    sign = Sign::Negative;
-    digits = std::vector<n256> {0, 0, 0, 0, 0, 0, 0, 128};  // 2^63 in little-endian
-    return;
-  }
-  if (num < 0) {
-    sign = Sign::Negative;
-    num = -num;
-    initFromUint64(static_cast<uint64_t>(num));
-  } else {
-    sign = Sign::Positive;
-    initFromUint64(static_cast<uint64_t>(num));
-  }
-}
+SuperLong::SuperLong(SuperLong&& other) noexcept : sign(other.sign), digits(std::move(other.digits)) {}
 
 
 SuperLong& SuperLong::operator=(const SuperLong& other) {
@@ -101,6 +32,86 @@ SuperLong& SuperLong::operator=(SuperLong&& other) noexcept {
   return *this;
 }
 
+SuperLong::SuperLong(const std::string& str) {
+  if (str.empty()) {
+    throw std::invalid_argument("Input string cannot be empty");
+  }
+
+  size_t start = 0;
+  if (str[0] == '-') {
+    sign = Sign::Negative;
+    start = 1;
+  } else {
+    sign = Sign::Positive;
+    if (str[0] == '+') {
+      start = 1;
+    }
+  }
+  std::string strc = str.substr(start);
+
+  // Validate that all characters are digits
+  if (strc.empty()) {
+    throw std::invalid_argument("Input string cannot be just a sign");
+  }
+  for (char c : strc) {
+    if (c < '0' || c > '9') {
+      throw std::invalid_argument("Input string contains non-digit characters");
+    }
+  }
+
+  if (strc == "0") {
+    digits.push_back(0);
+    sign = Sign::Positive;
+    return;
+  }
+
+  while (!strc.empty()) {
+    n256plus remainder = 0;
+    std::string new_str;
+
+    for (size_t i = 0; i < strc.size(); i++) {
+      n256plus value = remainder * 10 + (strc[i] - '0');
+      if (value / 256 != 0 || i > 0 || !new_str.empty()) {
+        new_str += static_cast<char>('0' + (value / 256));
+      }
+      remainder = value % 256;
+    }
+    
+    digits.push_back(static_cast<n256>(remainder));
+    strc = new_str;
+  }
+
+  removeLeadingZeros();
+}
+
+
+void SuperLong::initFromUint64(uint64_t num) {
+  if (num == 0) {
+    digits.push_back(0);
+    return;
+  }
+  while (num > 0) {
+    digits.push_back(static_cast<n256>(num % 256));
+    num /= 256;
+  }
+}
+
+
+SuperLong::SuperLong(int64_t num) {
+  if (num == INT64_MIN) {
+    sign = Sign::Negative;
+    digits = std::vector<n256> {0, 0, 0, 0, 0, 0, 0, 128};  // 2^63 in little-endian
+    return;
+  }
+  if (num < 0) {
+    sign = Sign::Negative;
+    initFromUint64(static_cast<uint64_t>(-num));
+  } else {
+    sign = Sign::Positive;
+    initFromUint64(static_cast<uint64_t>(num));
+  }
+}
+
 
 std::string SuperLong::toString() const {
   if (isZero()) {
@@ -112,7 +123,7 @@ std::string SuperLong::toString() const {
   temp.sign = Sign::Positive;
 
   while (!temp.isZero()) {
-    auto [quotient, remainder] = divide_quo_rem(temp, SuperLong(static_cast<n256>(10)));
+    auto [quotient, remainder] = divide_quo_rem(temp, SuperLong(10LL));
     temp = quotient;
     result += static_cast<char>(remainder.digits[0] + '0');
   }
@@ -122,3 +133,24 @@ std::string SuperLong::toString() const {
   std::reverse(result.begin(), result.end());
   return result;
 }
+
+
+void SuperLong::negate() {
+  sign = (sign == Sign::Positive) ? Sign::Negative : Sign::Positive;
+}
+
+
+bool SuperLong::isZero() const {
+  return digits.size() == 1 && digits[0] == 0;
+}
+
+
+bool SuperLong::isNegative() const {
+  return sign == Sign::Negative;
+}
+
+
+bool SuperLong::isPositive() const {
+  return sign == Sign::Positive;
+}
+

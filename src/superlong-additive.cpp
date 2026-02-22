@@ -28,6 +28,7 @@ int SuperLong::abscmp(const SuperLong& a, const SuperLong& b) {
 
 SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
+  result.digits.clear();  // Clear the default [0]
   n256plus carry = 0;
 
   size_t maxSize = std::max(a.digits.size(), b.digits.size());
@@ -53,6 +54,7 @@ SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
 
 SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
+  result.digits.clear();
   n256plus borrow = 0;
 
   result.digits.reserve(a.digits.size());
@@ -115,17 +117,52 @@ SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
 
     if (cmp == 0) {
       return SuperLong();
+    }
 
-    } else if (cmp > 0) {
+    if (a.sign == Sign::Positive) {
+      if (cmp > 0) {
+        SuperLong result = subtractAbs(a, b);
+        result.sign = Sign::Positive;
+        return result;
+
+      } else {
+        SuperLong result = subtractAbs(b, a);
+        result.sign = Sign::Negative;
+        result.removeLeadingZeros();
+        return result;
+      }
+    }
+    // (-a) - (-b) = b - a
+    if (cmp > 0) {
       SuperLong result = subtractAbs(a, b);
-      result.sign = a.sign;
+      result.sign = Sign::Negative;
       return result;
 
-      // a - b = -(b - a) if |a| < |b|
     } else {
       SuperLong result = subtractAbs(b, a);
-      result.negate();
+      result.sign = Sign::Positive;
+      result.removeLeadingZeros();
       return result;
     }
   }
+}
+
+
+SuperLong SuperLong::operator+(const SuperLong& other) const {
+  return add(*this, other);
+}
+
+
+SuperLong SuperLong::operator-(const SuperLong& other) const {
+  return subtract(*this, other);
+}
+
+
+SuperLong SuperLong::operator+(int64_t other) const {
+  return *this + SuperLong(other);
+}
+
+
+SuperLong SuperLong::operator-(int64_t other) const {
+  return *this - SuperLong(other);
 }

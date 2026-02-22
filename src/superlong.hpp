@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <utility>
 
 using n256 = uint8_t;
 using n256plus = uint32_t;
@@ -26,9 +27,15 @@ class SuperLong {
   SuperLong operator+(const SuperLong& other) const { return add(*this, other); }
   SuperLong operator-(const SuperLong& other) const { return subtract(*this, other); }
   SuperLong operator*(const SuperLong& other) const { return multiply(*this, other); }
-  SuperLong operator/(const SuperLong& other) const { return divide_quo(*this, other, false); }
-  SuperLong operator%(const SuperLong& other) const { return divide_quo(*this, other, true); }
-              
+  SuperLong operator/(const SuperLong& other) const { return divide_quo_rem(*this, other).first; }
+  SuperLong operator%(const SuperLong& other) const { return divide_quo_rem(*this, other).second; }
+
+  SuperLong operator+(int64_t other) const { return add(*this, SuperLong(other)); }
+  SuperLong operator-(int64_t other) const { return subtract(*this, SuperLong(other)); }
+  SuperLong operator*(int64_t other) const { return multiply(*this, SuperLong(other)); }
+  SuperLong operator/(int64_t other) const { return divide_quo_rem(*this, SuperLong(other)).first; }
+  SuperLong operator%(int64_t other) const { return divide_quo_rem(*this, SuperLong(other)).second; }
+
   bool operator==(const SuperLong& other) const;
   bool operator!=(const SuperLong& other) const;
   bool operator<(const SuperLong& other) const;
@@ -41,7 +48,7 @@ class SuperLong {
   bool isZero() const { return digits.size() == 1 && digits[0] == 0; }
   bool isNegative() const { return sign == Sign::Negative; }
   bool isPositive() const { return sign == Sign::Positive; }
-            
+
   std::string toString() const;
 
  private:
@@ -64,8 +71,10 @@ class SuperLong {
   static SuperLong subtractAbs(const SuperLong& a, const SuperLong& b);
 
   static SuperLong multiply(const SuperLong& a, const SuperLong& b);
-  
-  static SuperLong divide_quo(const SuperLong& a, const SuperLong& b, bool returnRemainder = false);
+  static SuperLong multiply_simple(const SuperLong& a, const SuperLong& b);
+  static SuperLong multiply_karatsuba(const SuperLong& a, const SuperLong& b);
+
+  static std::pair<SuperLong, SuperLong> divide_quo_rem(const SuperLong& a, const SuperLong& b);
 
   SuperLong multi256n(size_t shift) const;
   SuperLong divid256n(size_t shift) const;

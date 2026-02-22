@@ -61,7 +61,7 @@ SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
     n256 digitA = a.digits[i];
     n256 digitB = (i < b.digits.size()) ? b.digits[i] : 0;
 
-    n256plus diff = static_cast<n256plus>(digitA) - static_cast<n256plus>(digitB) - static_cast<n256plus>(borrow);
+    int16_t diff = static_cast<int16_t>(digitA) - static_cast<int16_t>(digitB) - static_cast<int16_t>(borrow);
 
     if (diff >= 0) {
       result.digits.push_back(static_cast<n256>(diff));

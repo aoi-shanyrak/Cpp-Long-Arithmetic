@@ -1,6 +1,7 @@
 #include "superlong.hpp"
 
 #include <algorithm>
+#include <climits>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -57,7 +58,7 @@ void SuperLong::initFromUint64(uint64_t num) {
   while (num > 0) {
     digits.push_back(static_cast<n256>(num % 256));
     num /= 256;
-  } 
+  }
 }
 
 
@@ -69,7 +70,7 @@ SuperLong::SuperLong(uint64_t num) : sign(Sign::Positive) {
 SuperLong::SuperLong(int64_t num) {
   if (num == INT64_MIN) {
     sign = Sign::Negative;
-    digits = std::vector<n256>{0, 0, 0, 0, 0, 0, 0, 128}; // 2^63 in little-endian
+    digits = std::vector<n256> {0, 0, 0, 0, 0, 0, 0, 128};  // 2^63 in little-endian
     return;
   }
   if (num < 0) {
@@ -79,5 +80,45 @@ SuperLong::SuperLong(int64_t num) {
   } else {
     sign = Sign::Positive;
     initFromUint64(static_cast<uint64_t>(num));
-  } 
-} 
+  }
+}
+
+
+SuperLong& SuperLong::operator=(const SuperLong& other) {
+  if (this != &other) {
+    sign = other.sign;
+    digits = other.digits;
+  }
+  return *this;
+}
+
+
+SuperLong& SuperLong::operator=(SuperLong&& other) noexcept {
+  if (this != &other) {
+    sign = other.sign;
+    digits = std::move(other.digits);
+  }
+  return *this;
+}
+
+
+std::string SuperLong::toString() const {
+  if (isZero()) {
+    return "0";
+  }
+  std::string result;
+ 
+  SuperLong temp = *this;
+  temp.sign = Sign::Positive;
+
+  while (!temp.isZero()) {
+    auto [quotient, remainder] = divide_quo_rem(temp, SuperLong(static_cast<n256>(10)));
+    temp = quotient;
+    result += static_cast<char>(remainder.digits[0] + '0');
+  }
+  if (sign == Sign::Negative) {
+    result += '-';
+  }
+  std::reverse(result.begin(), result.end());
+  return result;
+}

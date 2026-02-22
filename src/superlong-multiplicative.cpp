@@ -1,5 +1,6 @@
 #include "superlong.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 
 
@@ -10,7 +11,7 @@ SuperLong SuperLong::multi256n(size_t shift) const {
   SuperLong result(*this);
 
   result.digits.reserve(result.digits.size() + shift);
-  result.digits.insert(result.digits.end(), shift, 0);
+  result.digits.insert(result.digits.begin(), shift, 0);
 
   return result;
 }
@@ -32,7 +33,7 @@ SuperLong SuperLong::divid256n(size_t shift) const {
 }
 
 
-SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
+SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
   result.digits.reserve(a.digits.size() + b.digits.size());
 
@@ -60,27 +61,55 @@ SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
 
     result = add(result, temp);
   }
-  result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
-
   result.removeLeadingZeros();
 
   return result;
 }
 
 
-SuperLong SuperLong::divide_quo(const SuperLong& a, const SuperLong& b, bool returnRemainder) {
+SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) {
+  if (x.digits.size() < 32 || y.digits.size() < 32) {
+    return multiply_simple(x, y);
+  }
+
+  size_t m = std::min(x.digits.size(), y.digits.size()) / 2;
+
+  SuperLong b = x.divid256n(m);
+  SuperLong a = x.multi256n(b.digits.size());
+  SuperLong d = y.divid256n(m);
+  SuperLong c = y.multi256n(d.digits.size());
+
+  SuperLong z0 = multiply_karatsuba(b, d);
+  SuperLong z1 = multiply_karatsuba(a + b, c + d);
+  SuperLong z2 = multiply_karatsuba(a, c);
+
+  return z2.multi256n(2 * m) + (z1 - z2 - z0).multi256n(m) + z0;
+}
+
+
+SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
+  SuperLong result = multiply_karatsuba(a, b);
+  result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
+  if (result.isZero()) {
+    result.sign = Sign::Positive;
+  }
+  return result;
+}
+
+
+std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, const SuperLong& b) {
   if (b.isZero()) {
     throw std::invalid_argument("Division by zero");
   }
   if (a.isZero()) {
-    return SuperLong();
+    return {SuperLong(), SuperLong()};
   }
 
   SuperLong dividend = a, divisor = b;
   dividend.sign = divisor.sign = Sign::Positive;
 
   if (abscmp(dividend, divisor) < 0) {
-    return (returnRemainder) ? a : SuperLong();
+    return {SuperLong(), a};
   }
 
   SuperLong quotient, remainder;
@@ -94,7 +123,7 @@ SuperLong SuperLong::divide_quo(const SuperLong& a, const SuperLong& b, bool ret
       while (low <= high) {
         n256 mid = low + (high - low) / 2;
 
-        SuperLong product = divisor * SuperLong(static_cast<n256>(mid));
+        SuperLong product = divisor * mid;
 
         if (abscmp(product, remainder) <= 0) {
           best = mid;
@@ -109,15 +138,12 @@ SuperLong SuperLong::divide_quo(const SuperLong& a, const SuperLong& b, bool ret
       quotient.digits.push_back(0);
     }
   }
+  std::reverse(quotient.digits.begin(), quotient.digits.end());
 
   quotient.removeLeadingZeros();
   remainder.removeLeadingZeros();
 
-  if (returnRemainder) {
-    remainder.sign = a.sign;
-    return remainder;
-  } else {
-    quotient.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
-    return quotient;
-  }
+  remainder.sign = a.sign;
+  quotient.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
+  return {quotient, remainder};
 }

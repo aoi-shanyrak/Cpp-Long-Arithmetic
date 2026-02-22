@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+
 SuperLong::SuperLong(const std::string& str) {
   if (str.empty()) {
     throw std::invalid_argument("Input string cannot be empty");
@@ -46,3 +47,37 @@ SuperLong::SuperLong(const std::string& str) {
     strc = new_str;
   }
 }
+
+
+void SuperLong::initFromUint64(uint64_t num) {
+  if (num == 0) {
+    digits.push_back(0);
+    return;
+  }
+  while (num > 0) {
+    digits.push_back(static_cast<n256>(num % 256));
+    num /= 256;
+  } 
+}
+
+
+SuperLong::SuperLong(uint64_t num) : sign(Sign::Positive) {
+  initFromUint64(num);
+}
+
+
+SuperLong::SuperLong(int64_t num) {
+  if (num == INT64_MIN) {
+    sign = Sign::Negative;
+    digits = std::vector<n256>{0, 0, 0, 0, 0, 0, 0, 128}; // 2^63 in little-endian
+    return;
+  }
+  if (num < 0) {
+    sign = Sign::Negative;
+    num = -num;
+    initFromUint64(static_cast<uint64_t>(num));
+  } else {
+    sign = Sign::Positive;
+    initFromUint64(static_cast<uint64_t>(num));
+  } 
+} 

@@ -12,21 +12,8 @@ enum class Sign { Positive, Negative };
 
 
 class SuperLong {
- private:
-  std::vector<n256> digits;
-  Sign sign;
-
-  void removeLeadingZeros();
-
-  static SuperLong add(const SuperLong& a, const SuperLong& b);
-  static SuperLong subtract(const SuperLong& a, const SuperLong& b);
-  static SuperLong multiply(const SuperLong& a, const SuperLong& b);
-  static SuperLong divide(const SuperLong& a, const SuperLong& b);
-
  public:
   SuperLong() : sign(Sign::Positive), digits(0) {}
-  SuperLong(n256 num) : sign(Sign::Positive), digits(1, num) {}
-  SuperLong(uint32_t num);
   SuperLong(int64_t num);
   SuperLong(const std::string& str);
   SuperLong(const SuperLong& other) : sign(other.sign), digits(other.digits) {}
@@ -40,7 +27,7 @@ class SuperLong {
   SuperLong operator-(const SuperLong& other) const;
   SuperLong operator*(const SuperLong& other) const;
   SuperLong operator/(const SuperLong& other) const;
-
+              
   bool operator==(const SuperLong& other) const;
   bool operator!=(const SuperLong& other) const;
   bool operator<(const SuperLong& other) const;
@@ -55,4 +42,29 @@ class SuperLong {
   bool isPositive() const { return sign == Sign::Positive; }
 
   std::string toString() const;
+
+ private:
+  std::vector<n256> digits;
+  Sign sign;
+
+  SuperLong(n256 num) : sign(Sign::Positive), digits(1, num) {}
+  SuperLong(uint64_t num);
+
+  void removeLeadingZeros();
+
+  void initFromUint64(uint64_t num);
+
+  static int abscmp(const SuperLong& a, const SuperLong& b);
+
+  static SuperLong add(const SuperLong& a, const SuperLong& b);
+  static SuperLong addAbs(const SuperLong& a, const SuperLong& b);
+
+  static SuperLong subtract(const SuperLong& a, const SuperLong& b);
+  static SuperLong subtractAbs(const SuperLong& a, const SuperLong& b);
+
+  static SuperLong multiply(const SuperLong& a, const SuperLong& b);
+  static SuperLong multiplyAbs(const SuperLong& a, const SuperLong& b);
+  
+  static SuperLong divide(const SuperLong& a, const SuperLong& b);
+  static SuperLong divideAbs(const SuperLong& a, const SuperLong& b);
 };

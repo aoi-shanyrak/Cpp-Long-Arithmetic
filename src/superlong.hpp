@@ -23,10 +23,11 @@ class SuperLong {
   SuperLong& operator=(const SuperLong& other);
   SuperLong& operator=(SuperLong&& other) noexcept;
 
-  SuperLong operator+(const SuperLong& other) const;
-  SuperLong operator-(const SuperLong& other) const;
-  SuperLong operator*(const SuperLong& other) const;
-  SuperLong operator/(const SuperLong& other) const;
+  SuperLong operator+(const SuperLong& other) const { return add(*this, other); }
+  SuperLong operator-(const SuperLong& other) const { return subtract(*this, other); }
+  SuperLong operator*(const SuperLong& other) const { return multiply(*this, other); }
+  SuperLong operator/(const SuperLong& other) const { return divide_quo(*this, other, false); }
+  SuperLong operator%(const SuperLong& other) const { return divide_quo(*this, other, true); }
               
   bool operator==(const SuperLong& other) const;
   bool operator!=(const SuperLong& other) const;
@@ -40,7 +41,7 @@ class SuperLong {
   bool isZero() const { return digits.size() == 1 && digits[0] == 0; }
   bool isNegative() const { return sign == Sign::Negative; }
   bool isPositive() const { return sign == Sign::Positive; }
-
+            
   std::string toString() const;
 
  private:
@@ -63,8 +64,9 @@ class SuperLong {
   static SuperLong subtractAbs(const SuperLong& a, const SuperLong& b);
 
   static SuperLong multiply(const SuperLong& a, const SuperLong& b);
-  static SuperLong multiplyAbs(const SuperLong& a, const SuperLong& b);
   
-  static SuperLong divide(const SuperLong& a, const SuperLong& b);
-  static SuperLong divideAbs(const SuperLong& a, const SuperLong& b);
+  static SuperLong divide_quo(const SuperLong& a, const SuperLong& b, bool returnRemainder = false);
+
+  SuperLong multi256n(size_t shift) const;
+  SuperLong divid256n(size_t shift) const;
 };

@@ -1,5 +1,8 @@
 #include "superlong.hpp"
 
+#include <stdexcept>
+
+
 void SuperLong::removeLeadingZeros() {
   while (digits.size() > 1 and digits.back() == 0) {
     digits.pop_back();
@@ -118,7 +121,7 @@ SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
       result.sign = a.sign;
       return result;
 
-    // a - b = -(b - a) if |a| < |b|  
+      // a - b = -(b - a) if |a| < |b|
     } else {
       SuperLong result = subtractAbs(b, a);
       result.negate();

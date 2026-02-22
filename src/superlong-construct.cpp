@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-using n256plus = uint32_t;
-
 SuperLong::SuperLong(const std::string& str) {
   if (str.empty()) {
     throw std::invalid_argument("Input string cannot be empty");

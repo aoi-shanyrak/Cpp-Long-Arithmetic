@@ -28,12 +28,6 @@ class SuperLong {
   SuperLong operator/(const SuperLong& other) const;
   SuperLong operator%(const SuperLong& other) const;
 
-  SuperLong operator+(int64_t other) const;
-  SuperLong operator-(int64_t other) const;
-  SuperLong operator*(int64_t other) const;
-  SuperLong operator/(int64_t other) const;
-  SuperLong operator%(int64_t other) const;
-
   bool operator==(const SuperLong& other) const;
   bool operator!=(const SuperLong& other) const;
   bool operator<(const SuperLong& other) const;

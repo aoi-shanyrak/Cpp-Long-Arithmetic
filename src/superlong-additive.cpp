@@ -156,13 +156,3 @@ SuperLong SuperLong::operator+(const SuperLong& other) const {
 SuperLong SuperLong::operator-(const SuperLong& other) const {
   return subtract(*this, other);
 }
-
-
-SuperLong SuperLong::operator+(int64_t other) const {
-  return *this + SuperLong(other);
-}
-
-
-SuperLong SuperLong::operator-(int64_t other) const {
-  return *this - SuperLong(other);
-}

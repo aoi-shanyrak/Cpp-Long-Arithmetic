@@ -35,13 +35,13 @@ SuperLong SuperLong::divid256n(size_t shift) const {
 
 SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
-  result.digits.clear(); 
+  result.digits.clear();
 
   result.digits.reserve(a.digits.size() + b.digits.size());
 
   for (size_t i = 0; i < a.digits.size(); i++) {
     SuperLong temp;
-    temp.digits.clear(); 
+    temp.digits.clear();
 
     for (size_t k = 0; k < i; k++) {
       temp.digits.push_back(0);
@@ -117,7 +117,7 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
   }
 
   SuperLong quotient, remainder;
-  quotient.digits.clear();  
+  quotient.digits.clear();
 
   for (size_t i = dividend.digits.size(); i-- > 0;) {
     remainder = remainder.multi256n(1) + SuperLong(dividend.digits[i]);
@@ -167,16 +167,3 @@ SuperLong SuperLong::operator/(const SuperLong& other) const {
 SuperLong SuperLong::operator%(const SuperLong& other) const {
   return divide_quo_rem(*this, other).second;
 }
-
-SuperLong SuperLong::operator*(int64_t other) const {
-  return *this * SuperLong(other);
-}
-
-SuperLong SuperLong::operator/(int64_t other) const {
-  return *this / SuperLong(other);
-}
-
-SuperLong SuperLong::operator%(int64_t other) const {
-  return *this % SuperLong(other);
-}
-

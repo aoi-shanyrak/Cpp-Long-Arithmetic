@@ -1,7 +1,5 @@
 #include "superlong.hpp"
 
-#include <stdexcept>
-
 
 void SuperLong::removeLeadingZeros() {
   while (digits.size() > 1 and digits.back() == 0) {

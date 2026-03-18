@@ -48,14 +48,14 @@ void testConstruction() {
   TEST("Default constructor creates zero", zero.isZero());
 
   // String constructors (most reliable way)
-  SuperLong num1 {"42"};
+  SuperLong num1 = "42"_sl;
   TEST("Constructor from positive string", num1.toString() == "42");
 
-  SuperLong num2 {"-42"};
+  SuperLong num2 = "-42"_sl;
   TEST("Constructor from negative string", num2.toString() == "-42");
 
   // String constructors
-  SuperLong fromStr1 {"123456789"};
+  SuperLong fromStr1 = "123456789"_sl;
   TEST("Constructor from positive string", fromStr1.toString() == "123456789");
 
   SuperLong fromStr2 {"-987654321"};
@@ -582,6 +582,23 @@ void testStringParsing() {
   TEST("Negative zero normalizes to zero", negative_zero.toString() == "0" && negative_zero.isZero());
 }
 
+// User-defined literal tests
+void testUserDefinedLiteral() {
+  std::cout << "\n=== User-defined Literal Tests ===" << std::endl;
+
+  SuperLong literalPos = "12345678901234567890"_sl;
+  TEST("_sl parses positive value", literalPos.toString() == "12345678901234567890");
+
+  SuperLong literalNeg = "-42"_sl;
+  TEST("_sl parses negative value", literalNeg.toString() == "-42");
+
+  SuperLong literalWithZeros = "000123"_sl;
+  TEST("_sl normalizes leading zeros", literalWithZeros.toString() == "123");
+
+  TEST("_sl equals constructor result", "987654321"_sl == SuperLong("987654321"));
+  TEST("_sl works in arithmetic", ("100"_sl + "23"_sl).toString() == "123");
+}
+
 int main() {
   std::cout << "========================================" << std::endl;
   std::cout << "    SuperLong Comprehensive Test Suite" << std::endl;
@@ -601,6 +618,7 @@ int main() {
   testEdgeCases();
   testFibonacci();
   testStringParsing();
+  testUserDefinedLiteral();
 
   std::cout << std::endl;
   std::cout << "============================================================" << std::endl;

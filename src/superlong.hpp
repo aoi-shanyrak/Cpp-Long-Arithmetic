@@ -86,4 +86,6 @@ namespace aoi {
     SuperLong divid256n(size_t shift) const;
   };
 
+  SuperLong operator"" _sl(const char* str, size_t len);
+
 }

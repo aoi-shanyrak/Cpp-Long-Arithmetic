@@ -130,3 +130,7 @@ std::string SuperLong::toString() const {
   std::reverse(result.begin(), result.end());
   return result;
 }
+
+SuperLong aoi::operator"" _sl(const char* str, size_t len) {
+  return SuperLong {std::string(str, len)};
+}

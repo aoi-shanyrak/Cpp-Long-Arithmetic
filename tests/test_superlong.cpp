@@ -386,6 +386,50 @@ void testSignChecks() {
   TEST("NOT (0 is negative)", !zero.isNegative());
 }
 
+// Operator extension tests
+void testExtendedOperators() {
+  std::cout << "\n=== Extended Operator Tests ===" << std::endl;
+
+  SuperLong a {"100"};
+  a += SuperLong {"23"};
+  TEST("operator+= updates value", a.toString() == "123");
+
+  SuperLong b {"100"};
+  b -= SuperLong {"25"};
+  TEST("operator-= updates value", b.toString() == "75");
+
+  SuperLong c {"9"};
+  SuperLong oldPostInc = c++;
+  TEST("postfix ++ returns old value", oldPostInc.toString() == "9");
+  TEST("postfix ++ increments value", c.toString() == "10");
+
+  SuperLong d {"9"};
+  SuperLong& preIncRef = ++d;
+  TEST("prefix ++ increments value", d.toString() == "10");
+  TEST("prefix ++ returns reference to updated object", &preIncRef == &d);
+
+  SuperLong e {"10"};
+  SuperLong oldPostDec = e--;
+  TEST("postfix -- returns old value", oldPostDec.toString() == "10");
+  TEST("postfix -- decrements value", e.toString() == "9");
+
+  SuperLong f {"10"};
+  SuperLong& preDecRef = --f;
+  TEST("prefix -- decrements value", f.toString() == "9");
+  TEST("prefix -- returns reference to updated object", &preDecRef == &f);
+
+  SuperLong g {"64"};
+  TEST("right shift by 1 bit", (g >> 1).toString() == "32");
+  TEST("right shift by 6 bits", (g >> 6).toString() == "1");
+
+  SuperLong h {"3"};
+  TEST("left shift by 1 bit", (h << 1).toString() == "6");
+  TEST("left shift by 8 bits", (h << 8).toString() == "768");
+
+  SuperLong neg {"-32"};
+  TEST("right shift keeps sign for negative values", (neg >> 1).toString() == "-16");
+}
+
 // Edge cases
 void testEdgeCases() {
   std::cout << "\n=== Edge Cases ===" << std::endl;
@@ -513,6 +557,7 @@ int main() {
   testComparison();
   testNegation();
   testSignChecks();
+  testExtendedOperators();
   testEdgeCases();
   testFibonacci();
   testStringParsing();

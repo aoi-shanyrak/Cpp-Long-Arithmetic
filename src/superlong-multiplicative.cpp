@@ -17,6 +17,32 @@ SuperLong SuperLong::operator%(const SuperLong& other) const {
   return divide_quo_rem(*this, other).second;
 }
 
+SuperLong SuperLong::operator>>(size_t shift) const {
+  if (shift == 0) {
+    return *this;
+  }
+  size_t byteShift = shift / 8;
+  size_t bitShift = shift % 8;
+
+  SuperLong result {*this};
+  result = result.divid256n(byteShift);
+  size_t divisor = (bitShift != 0) ? (2 << (bitShift - 1)) : 1;
+  return result / divisor;
+}
+
+SuperLong SuperLong::operator<<(size_t shift) const {
+  if (shift == 0) {
+    return *this;
+  }
+  size_t byteShift = shift / 8;
+  size_t bitShift = shift % 8;
+
+  SuperLong result {*this};
+  result = result.multi256n(byteShift);
+  size_t multiplier = (bitShift != 0) ? (2 << (bitShift - 1)) : 1;
+  return result * multiplier;
+}
+
 SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
   SuperLong result = multiply_karatsuba(a, b);
   result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;

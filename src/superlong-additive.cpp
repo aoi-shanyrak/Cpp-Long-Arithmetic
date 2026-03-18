@@ -10,6 +10,38 @@ SuperLong SuperLong::operator-(const SuperLong& other) const {
   return subtract(*this, other);
 }
 
+SuperLong& SuperLong::operator+=(const SuperLong& other) {
+  *this = add(*this, other);
+  return *this;
+}
+
+SuperLong& SuperLong::operator-=(const SuperLong& other) {
+  *this = subtract(*this, other);
+  return *this;
+}
+
+SuperLong& SuperLong::operator++() {
+  this->operator+=(SuperLong {1});
+  return *this;
+}
+
+SuperLong SuperLong::operator++(int) {
+  SuperLong temp = *this;
+  this->operator+=(SuperLong {1});
+  return temp;
+}
+
+SuperLong& SuperLong::operator--() {
+  this->operator-=(SuperLong {1});
+  return *this;
+}
+
+SuperLong SuperLong::operator--(int) {
+  SuperLong temp = *this;
+  this->operator-=(SuperLong {1});
+  return temp;
+}
+
 SuperLong SuperLong::add(const SuperLong& a, const SuperLong& b) {
   if (a.sign == b.sign) {
     SuperLong result = addAbs(a, b);

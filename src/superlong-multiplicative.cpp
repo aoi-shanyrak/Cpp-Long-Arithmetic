@@ -5,31 +5,44 @@
 
 using namespace aoi;
 
-SuperLong SuperLong::multi256n(size_t shift) const {
-  if (shift == 0 || isZero()) {
-    return *this;
+SuperLong SuperLong::operator*(const SuperLong& other) const {
+  return multiply(*this, other);
+}
+
+SuperLong SuperLong::operator/(const SuperLong& other) const {
+  return divide_quo_rem(*this, other).first;
+}
+
+SuperLong SuperLong::operator%(const SuperLong& other) const {
+  return divide_quo_rem(*this, other).second;
+}
+
+SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
+  SuperLong result = multiply_karatsuba(a, b);
+  result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
+  if (result.isZero()) {
+    result.sign = Sign::Positive;
   }
-  SuperLong result(*this);
-
-  result.digits.reserve(result.digits.size() + shift);
-  result.digits.insert(result.digits.begin(), shift, 0);
-
   return result;
 }
 
-SuperLong SuperLong::divid256n(size_t shift) const {
-  if (shift == 0 || isZero()) {
-    return *this;
+SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) {
+  if (x.digits.size() < 32 || y.digits.size() < 32) {
+    return multiply_simple(x, y);
   }
-  if (shift >= digits.size()) {
-    return SuperLong();
-  }
-  SuperLong result(*this);
 
-  result.digits.erase(result.digits.begin(), result.digits.begin() + shift);
-  result.removeLeadingZeros();
+  size_t m = std::min(x.digits.size(), y.digits.size()) / 2;
 
-  return result;
+  SuperLong b = x.divid256n(m);
+  SuperLong a = x.multi256n(b.digits.size());
+  SuperLong d = y.divid256n(m);
+  SuperLong c = y.multi256n(d.digits.size());
+
+  SuperLong z0 = multiply_karatsuba(b, d);
+  SuperLong z1 = multiply_karatsuba(a + b, c + d);
+  SuperLong z2 = multiply_karatsuba(a, c);
+
+  return z2.multi256n(2 * m) + (z1 - z2 - z0).multi256n(m) + z0;
 }
 
 SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
@@ -66,34 +79,6 @@ SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   }
   result.removeLeadingZeros();
 
-  return result;
-}
-
-SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) {
-  if (x.digits.size() < 32 || y.digits.size() < 32) {
-    return multiply_simple(x, y);
-  }
-
-  size_t m = std::min(x.digits.size(), y.digits.size()) / 2;
-
-  SuperLong b = x.divid256n(m);
-  SuperLong a = x.multi256n(b.digits.size());
-  SuperLong d = y.divid256n(m);
-  SuperLong c = y.multi256n(d.digits.size());
-
-  SuperLong z0 = multiply_karatsuba(b, d);
-  SuperLong z1 = multiply_karatsuba(a + b, c + d);
-  SuperLong z2 = multiply_karatsuba(a, c);
-
-  return z2.multi256n(2 * m) + (z1 - z2 - z0).multi256n(m) + z0;
-}
-
-SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
-  SuperLong result = multiply_karatsuba(a, b);
-  result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
-  if (result.isZero()) {
-    result.sign = Sign::Positive;
-  }
   return result;
 }
 
@@ -151,14 +136,29 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
   return {quotient, remainder};
 }
 
-SuperLong SuperLong::operator*(const SuperLong& other) const {
-  return multiply(*this, other);
+SuperLong SuperLong::multi256n(size_t shift) const {
+  if (shift == 0 || isZero()) {
+    return *this;
+  }
+  SuperLong result(*this);
+
+  result.digits.reserve(result.digits.size() + shift);
+  result.digits.insert(result.digits.begin(), shift, 0);
+
+  return result;
 }
 
-SuperLong SuperLong::operator/(const SuperLong& other) const {
-  return divide_quo_rem(*this, other).first;
-}
+SuperLong SuperLong::divid256n(size_t shift) const {
+  if (shift == 0 || isZero()) {
+    return *this;
+  }
+  if (shift >= digits.size()) {
+    return SuperLong();
+  }
+  SuperLong result(*this);
 
-SuperLong SuperLong::operator%(const SuperLong& other) const {
-  return divide_quo_rem(*this, other).second;
+  result.digits.erase(result.digits.begin(), result.digits.begin() + shift);
+  result.removeLeadingZeros();
+
+  return result;
 }

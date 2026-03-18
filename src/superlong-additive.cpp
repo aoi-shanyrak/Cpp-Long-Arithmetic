@@ -2,25 +2,37 @@
 
 using namespace aoi;
 
-void SuperLong::removeLeadingZeros() {
-  while (digits.size() > 1 and digits.back() == 0) {
-    digits.pop_back();
-  }
-  if (digits.size() == 1 && digits[0] == 0) {
-    sign = Sign::Positive;
-  }
+SuperLong SuperLong::operator+(const SuperLong& other) const {
+  return add(*this, other);
 }
 
-int SuperLong::abscmp(const SuperLong& a, const SuperLong& b) {
-  if (a.digits.size() != b.digits.size()) {
-    return (a.digits.size() < b.digits.size()) ? -1 : 1;
-  }
-  for (size_t i = a.digits.size(); i-- > 0;) {
-    if (a.digits[i] != b.digits[i]) {
-      return (a.digits[i] < b.digits[i]) ? -1 : 1;
+SuperLong SuperLong::operator-(const SuperLong& other) const {
+  return subtract(*this, other);
+}
+
+SuperLong SuperLong::add(const SuperLong& a, const SuperLong& b) {
+  if (a.sign == b.sign) {
+    SuperLong result = addAbs(a, b);
+    result.sign = a.sign;
+    return result;
+
+  } else {
+    int cmp = abscmp(a, b);
+
+    if (cmp == 0) {
+      return SuperLong();
+
+    } else if (cmp > 0) {
+      SuperLong result = subtractAbs(a, b);
+      result.sign = a.sign;
+      return result;
+
+    } else {
+      SuperLong result = subtractAbs(b, a);
+      result.sign = b.sign;
+      return result;
     }
   }
-  return 0;
 }
 
 SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
@@ -48,6 +60,18 @@ SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
   return result;
 }
 
+int SuperLong::abscmp(const SuperLong& a, const SuperLong& b) {
+  if (a.digits.size() != b.digits.size()) {
+    return (a.digits.size() < b.digits.size()) ? -1 : 1;
+  }
+  for (size_t i = a.digits.size(); i-- > 0;) {
+    if (a.digits[i] != b.digits[i]) {
+      return (a.digits[i] < b.digits[i]) ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
 SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
   result.digits.clear();
@@ -72,31 +96,6 @@ SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
   result.removeLeadingZeros();
 
   return result;
-}
-
-SuperLong SuperLong::add(const SuperLong& a, const SuperLong& b) {
-  if (a.sign == b.sign) {
-    SuperLong result = addAbs(a, b);
-    result.sign = a.sign;
-    return result;
-
-  } else {
-    int cmp = abscmp(a, b);
-
-    if (cmp == 0) {
-      return SuperLong();
-
-    } else if (cmp > 0) {
-      SuperLong result = subtractAbs(a, b);
-      result.sign = a.sign;
-      return result;
-
-    } else {
-      SuperLong result = subtractAbs(b, a);
-      result.sign = b.sign;
-      return result;
-    }
-  }
 }
 
 SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
@@ -139,12 +138,4 @@ SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
       return result;
     }
   }
-}
-
-SuperLong SuperLong::operator+(const SuperLong& other) const {
-  return add(*this, other);
-}
-
-SuperLong SuperLong::operator-(const SuperLong& other) const {
-  return subtract(*this, other);
 }

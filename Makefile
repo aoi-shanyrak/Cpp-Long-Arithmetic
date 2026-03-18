@@ -10,8 +10,8 @@ TEST_DIR = tests
 BUILD_DIR = build
 
 # Source files
-SRC_FILES = src/superlong-construct.cpp src/superlong-additive.cpp src/superlong-multiplicative.cpp src/superlong-compare.cpp
-OBJ_FILES = build/superlong-construct.o build/superlong-additive.o build/superlong-multiplicative.o build/superlong-compare.o
+SRC_FILES = src/superlong-construct.cpp src/superlong-additive.cpp src/superlong-multiplicative.cpp src/superlong-compare.cpp src/superlong-utility.cpp
+OBJ_FILES = build/superlong-construct.o build/superlong-additive.o build/superlong-multiplicative.o build/superlong-compare.o build/superlong-utility.o
 
 # Test
 TEST_SOURCE = $(TEST_DIR)/test_superlong.cpp
@@ -43,6 +43,9 @@ $(BUILD_DIR)/superlong-multiplicative.o: $(SRC_DIR)/superlong-multiplicative.cpp
 	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 $(BUILD_DIR)/superlong-compare.o: $(SRC_DIR)/superlong-compare.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
+
+$(BUILD_DIR)/superlong-utility.o: $(SRC_DIR)/superlong-utility.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 $(BUILD_DIR)/test_superlong.o: $(TEST_SOURCE) | $(BUILD_DIR)

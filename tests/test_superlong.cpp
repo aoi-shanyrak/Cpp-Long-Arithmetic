@@ -428,6 +428,46 @@ void testExtendedOperators() {
 
   SuperLong neg {"-32"};
   TEST("right shift keeps sign for negative values", (neg >> 1).toString() == "-16");
+
+  SuperLong m1 {"12"};
+  m1 *= SuperLong {"7"};
+  TEST("operator*= updates value", m1.toString() == "84");
+
+  SuperLong m2 {"84"};
+  m2 /= SuperLong {"7"};
+  TEST("operator/= updates value", m2.toString() == "12");
+
+  SuperLong m3 {"84"};
+  m3 %= SuperLong {"10"};
+  TEST("operator%= updates value", m3.toString() == "4");
+
+  SuperLong chainMul {"3"};
+  SuperLong& chainMulRef = (chainMul *= SuperLong {"4"});
+  TEST("operator*= returns reference", &chainMulRef == &chainMul);
+  TEST("operator*= reference points to updated value", chainMul.toString() == "12");
+
+  SuperLong chainDiv {"100"};
+  SuperLong& chainDivRef = (chainDiv /= SuperLong {"4"});
+  TEST("operator/= returns reference", &chainDivRef == &chainDiv);
+  TEST("operator/= reference points to updated value", chainDiv.toString() == "25");
+
+  SuperLong chainMod {"100"};
+  SuperLong& chainModRef = (chainMod %= SuperLong {"9"});
+  TEST("operator%= returns reference", &chainModRef == &chainMod);
+  TEST("operator%= reference points to updated value", chainMod.toString() == "1");
+
+  SuperLong shiftAssignL {"3"};
+  shiftAssignL <<= 8;
+  TEST("operator<<= updates value", shiftAssignL.toString() == "768");
+
+  SuperLong shiftAssignR {"768"};
+  shiftAssignR >>= 8;
+  TEST("operator>>= updates value", shiftAssignR.toString() == "3");
+
+  SuperLong shiftAssignChain {"48"};
+  SuperLong& shiftAssignRef = (shiftAssignChain >>= 4);
+  TEST("operator>>= returns reference", &shiftAssignRef == &shiftAssignChain);
+  TEST("operator>>= reference points to updated value", shiftAssignChain.toString() == "3");
 }
 
 // Edge cases

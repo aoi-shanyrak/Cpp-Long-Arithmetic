@@ -141,7 +141,7 @@ SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
     int cmp = abscmp(a, b);
 
     if (cmp == 0) {
-      return SuperLong();
+      return SuperLong {};
     }
 
     if (a.sign == Sign::Positive) {

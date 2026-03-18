@@ -5,6 +5,26 @@
 
 using namespace aoi;
 
+static constexpr size_t kByteBits = 8;
+static constexpr size_t kByteBase = 1 << kByteBits;
+
+static constexpr size_t KARATSUBA_THRESHOLD = 32;
+
+SuperLong& SuperLong::operator*=(const SuperLong& other) {
+  *this = *this * other;
+  return *this;
+}
+
+SuperLong& SuperLong::operator/=(const SuperLong& other) {
+  *this = *this / other;
+  return *this;
+}
+
+SuperLong& SuperLong::operator%=(const SuperLong& other) {
+  *this = *this % other;
+  return *this;
+}
+
 SuperLong SuperLong::operator*(const SuperLong& other) const {
   return multiply(*this, other);
 }
@@ -17,30 +37,38 @@ SuperLong SuperLong::operator%(const SuperLong& other) const {
   return divide_quo_rem(*this, other).second;
 }
 
+SuperLong& SuperLong::operator>>=(size_t shift) {
+  *this = *this >> shift;
+  return *this;
+}
+
+SuperLong& SuperLong::operator<<=(size_t shift) {
+  *this = *this << shift;
+  return *this;
+}
+
 SuperLong SuperLong::operator>>(size_t shift) const {
   if (shift == 0) {
     return *this;
   }
-  size_t byteShift = shift / 8;
-  size_t bitShift = shift % 8;
+  size_t byteShift = shift / kByteBits;
+  size_t bitShift = shift % kByteBits;
 
   SuperLong result {*this};
   result = result.divid256n(byteShift);
-  size_t divisor = (bitShift != 0) ? (2 << (bitShift - 1)) : 1;
-  return result / divisor;
+  return result / (1 << (bitShift));
 }
 
 SuperLong SuperLong::operator<<(size_t shift) const {
   if (shift == 0) {
     return *this;
   }
-  size_t byteShift = shift / 8;
-  size_t bitShift = shift % 8;
+  size_t byteShift = shift / kByteBits;
+  size_t bitShift = shift % kByteBits;
 
   SuperLong result {*this};
   result = result.multi256n(byteShift);
-  size_t multiplier = (bitShift != 0) ? (2 << (bitShift - 1)) : 1;
-  return result * multiplier;
+  return result * (1 << (bitShift));
 }
 
 SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
@@ -53,10 +81,9 @@ SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
 }
 
 SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) {
-  if (x.digits.size() < 32 || y.digits.size() < 32) {
+  if (x.digits.size() < KARATSUBA_THRESHOLD || y.digits.size() < KARATSUBA_THRESHOLD) {
     return multiply_simple(x, y);
   }
-
   size_t m = std::min(x.digits.size(), y.digits.size()) / 2;
 
   SuperLong b = x.divid256n(m);
@@ -92,12 +119,12 @@ SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
 
       n256plus product = static_cast<n256plus>(digitA) * static_cast<n256plus>(digitB) + carry;
 
-      temp.digits.push_back(static_cast<n256>(product & 0xFF));
-      carry = static_cast<n256plus>(product >> 8);
+      temp.digits.push_back(static_cast<n256>(product & (kByteBase - 1)));
+      carry = static_cast<n256plus>(product >> kByteBits);
     }
     while (carry > 0) {
-      temp.digits.push_back(static_cast<n256>(carry & 0xFF));
-      carry >>= 8;
+      temp.digits.push_back(static_cast<n256>(carry & (kByteBase - 1)));
+      carry >>= kByteBits;
     }
     temp.sign = Sign::Positive;
 
@@ -113,14 +140,14 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
     throw std::invalid_argument("Division by zero");
   }
   if (a.isZero()) {
-    return {SuperLong(), SuperLong()};
+    return {SuperLong {}, SuperLong {}};
   }
 
   SuperLong dividend = a, divisor = b;
   dividend.sign = divisor.sign = Sign::Positive;
 
   if (abscmp(dividend, divisor) < 0) {
-    return {SuperLong(), a};
+    return {SuperLong {}, a};
   }
 
   SuperLong quotient, remainder;
@@ -179,7 +206,7 @@ SuperLong SuperLong::divid256n(size_t shift) const {
     return *this;
   }
   if (shift >= digits.size()) {
-    return SuperLong();
+    return SuperLong {};
   }
   SuperLong result(*this);
 

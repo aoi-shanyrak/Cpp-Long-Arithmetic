@@ -59,7 +59,6 @@ SuperLong::SuperLong(const std::string& str) {
       throw std::invalid_argument("Input string contains non-digit characters");
     }
   }
-
   if (strc == "0") {
     digits.push_back(0);
     sign = Sign::Positive;
@@ -117,7 +116,7 @@ std::string SuperLong::toString() const {
   }
   std::string result;
 
-  SuperLong temp = *this;
+  SuperLong temp {*this};
   temp.sign = Sign::Positive;
 
   while (!temp.isZero()) {

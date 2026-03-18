@@ -36,8 +36,14 @@ namespace aoi {
     SuperLong operator*(const SuperLong& other) const;
     SuperLong operator/(const SuperLong& other) const;
     SuperLong operator%(const SuperLong& other) const;
+    SuperLong& operator*=(const SuperLong& other);
+    SuperLong& operator/=(const SuperLong& other);
+    SuperLong& operator%=(const SuperLong& other);
+
     SuperLong operator>>(size_t shift) const;
     SuperLong operator<<(size_t shift) const;
+    SuperLong& operator>>=(size_t shift);
+    SuperLong& operator<<=(size_t shift);
 
     bool operator==(const SuperLong& other) const;
     bool operator!=(const SuperLong& other) const;

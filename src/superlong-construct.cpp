@@ -7,13 +7,16 @@
 #include <string>
 #include <vector>
 
+using namespace aoi;
 
-SuperLong::SuperLong() : sign(Sign::Positive), digits(1, 0) {}
+SuperLong::SuperLong() : sign(Sign::Positive), digits(1, 0) {
+}
 
-SuperLong::SuperLong(const SuperLong& other) : sign(other.sign), digits(other.digits) {}
+SuperLong::SuperLong(const SuperLong& other) : sign(other.sign), digits(other.digits) {
+}
 
-SuperLong::SuperLong(SuperLong&& other) noexcept : sign(other.sign), digits(std::move(other.digits)) {}
-
+SuperLong::SuperLong(SuperLong&& other) noexcept : sign(other.sign), digits(std::move(other.digits)) {
+}
 
 SuperLong& SuperLong::operator=(const SuperLong& other) {
   if (this != &other) {
@@ -22,7 +25,6 @@ SuperLong& SuperLong::operator=(const SuperLong& other) {
   }
   return *this;
 }
-
 
 SuperLong& SuperLong::operator=(SuperLong&& other) noexcept {
   if (this != &other) {
@@ -49,7 +51,6 @@ SuperLong::SuperLong(const std::string& str) {
   }
   std::string strc = str.substr(start);
 
-  // Validate that all characters are digits
   if (strc.empty()) {
     throw std::invalid_argument("Input string cannot be just a sign");
   }
@@ -76,14 +77,13 @@ SuperLong::SuperLong(const std::string& str) {
       }
       remainder = value % 256;
     }
-    
+
     digits.push_back(static_cast<n256>(remainder));
     strc = new_str;
   }
 
   removeLeadingZeros();
 }
-
 
 void SuperLong::initFromUint64(uint64_t num) {
   if (num == 0) {
@@ -95,7 +95,6 @@ void SuperLong::initFromUint64(uint64_t num) {
     num /= 256;
   }
 }
-
 
 SuperLong::SuperLong(int64_t num) {
   if (num == INT64_MIN) {
@@ -112,13 +111,12 @@ SuperLong::SuperLong(int64_t num) {
   }
 }
 
-
 std::string SuperLong::toString() const {
   if (isZero()) {
     return "0";
   }
   std::string result;
- 
+
   SuperLong temp = *this;
   temp.sign = Sign::Positive;
 
@@ -134,23 +132,18 @@ std::string SuperLong::toString() const {
   return result;
 }
 
-
 void SuperLong::negate() {
   sign = (sign == Sign::Positive) ? Sign::Negative : Sign::Positive;
 }
-
 
 bool SuperLong::isZero() const {
   return digits.size() == 1 && digits[0] == 0;
 }
 
-
 bool SuperLong::isNegative() const {
   return sign == Sign::Negative;
 }
 
-
 bool SuperLong::isPositive() const {
   return sign == Sign::Positive;
 }
-

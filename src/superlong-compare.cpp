@@ -1,5 +1,6 @@
 #include "superlong.hpp"
 
+using namespace aoi;
 
 bool SuperLong::operator==(const SuperLong& other) const {
   if (sign != other.sign) {
@@ -11,14 +12,13 @@ bool SuperLong::operator==(const SuperLong& other) const {
   return digits == other.digits;
 }
 
-
 bool SuperLong::operator<(const SuperLong& other) const {
   if (sign != other.sign) {
     return sign == Sign::Negative;
   }
-  
+
   int cmp = abscmp(*this, other);
-  
+
   if (sign == Sign::Positive) {
     return cmp < 0;
   } else {
@@ -26,21 +26,17 @@ bool SuperLong::operator<(const SuperLong& other) const {
   }
 }
 
-
 bool SuperLong::operator<=(const SuperLong& other) const {
   return *this < other || *this == other;
 }
-
 
 bool SuperLong::operator>(const SuperLong& other) const {
   return !(*this <= other);
 }
 
-
 bool SuperLong::operator>=(const SuperLong& other) const {
   return !(*this < other);
 }
-
 
 bool SuperLong::operator!=(const SuperLong& other) const {
   return !(*this == other);

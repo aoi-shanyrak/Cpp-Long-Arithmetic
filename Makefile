@@ -54,4 +54,4 @@ debug: clean test
 clean:
 	@echo "Cleaning..."
 	@rm -rf $(BUILD_DIR)
-
+	@echo "done"

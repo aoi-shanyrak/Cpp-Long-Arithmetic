@@ -1,5 +1,6 @@
 #include "superlong.hpp"
 
+using namespace aoi;
 
 void SuperLong::removeLeadingZeros() {
   while (digits.size() > 1 and digits.back() == 0) {
@@ -9,7 +10,6 @@ void SuperLong::removeLeadingZeros() {
     sign = Sign::Positive;
   }
 }
-
 
 int SuperLong::abscmp(const SuperLong& a, const SuperLong& b) {
   if (a.digits.size() != b.digits.size()) {
@@ -22,7 +22,6 @@ int SuperLong::abscmp(const SuperLong& a, const SuperLong& b) {
   }
   return 0;
 }
-
 
 SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
@@ -48,7 +47,6 @@ SuperLong SuperLong::addAbs(const SuperLong& a, const SuperLong& b) {
 
   return result;
 }
-
 
 SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
@@ -76,7 +74,6 @@ SuperLong SuperLong::subtractAbs(const SuperLong& a, const SuperLong& b) {
   return result;
 }
 
-
 SuperLong SuperLong::add(const SuperLong& a, const SuperLong& b) {
   if (a.sign == b.sign) {
     SuperLong result = addAbs(a, b);
@@ -101,7 +98,6 @@ SuperLong SuperLong::add(const SuperLong& a, const SuperLong& b) {
     }
   }
 }
-
 
 SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
   // a - (-b) = a + b
@@ -145,11 +141,9 @@ SuperLong SuperLong::subtract(const SuperLong& a, const SuperLong& b) {
   }
 }
 
-
 SuperLong SuperLong::operator+(const SuperLong& other) const {
   return add(*this, other);
 }
-
 
 SuperLong SuperLong::operator-(const SuperLong& other) const {
   return subtract(*this, other);

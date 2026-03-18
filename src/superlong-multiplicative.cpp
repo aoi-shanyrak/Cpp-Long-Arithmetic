@@ -1,8 +1,9 @@
-#include "superlong.hpp"
-
 #include <algorithm>
 #include <stdexcept>
 
+#include "superlong.hpp"
+
+using namespace aoi;
 
 SuperLong SuperLong::multi256n(size_t shift) const {
   if (shift == 0 || isZero()) {
@@ -15,7 +16,6 @@ SuperLong SuperLong::multi256n(size_t shift) const {
 
   return result;
 }
-
 
 SuperLong SuperLong::divid256n(size_t shift) const {
   if (shift == 0 || isZero()) {
@@ -31,7 +31,6 @@ SuperLong SuperLong::divid256n(size_t shift) const {
 
   return result;
 }
-
 
 SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   SuperLong result;
@@ -70,7 +69,6 @@ SuperLong SuperLong::multiply_simple(const SuperLong& a, const SuperLong& b) {
   return result;
 }
 
-
 SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) {
   if (x.digits.size() < 32 || y.digits.size() < 32) {
     return multiply_simple(x, y);
@@ -90,7 +88,6 @@ SuperLong SuperLong::multiply_karatsuba(const SuperLong& x, const SuperLong& y) 
   return z2.multi256n(2 * m) + (z1 - z2 - z0).multi256n(m) + z0;
 }
 
-
 SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
   SuperLong result = multiply_karatsuba(a, b);
   result.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
@@ -99,7 +96,6 @@ SuperLong SuperLong::multiply(const SuperLong& a, const SuperLong& b) {
   }
   return result;
 }
-
 
 std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, const SuperLong& b) {
   if (b.isZero()) {
@@ -154,7 +150,6 @@ std::pair<SuperLong, SuperLong> SuperLong::divide_quo_rem(const SuperLong& a, co
   quotient.sign = (a.sign == b.sign) ? Sign::Positive : Sign::Negative;
   return {quotient, remainder};
 }
-
 
 SuperLong SuperLong::operator*(const SuperLong& other) const {
   return multiply(*this, other);
